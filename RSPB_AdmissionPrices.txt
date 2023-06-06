@@ -1,0 +1,222 @@
+# RSPB
+library("tidyverse")
+library("rvest")
+library("data.table")
+library("openxlsx")
+
+Columns = c("Ticket", "With Gift Aid", "Without Gift Aid", "Site", "WWT Comparison Site")
+
+PaghamURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/pagham-harbour-local-nature-reserve/")
+PulboroughURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/pulborough-brooks/")
+MerseheadURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/mersehead/")
+Burton_MereURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/dee-estuary-burton-mere-wetlands/")
+LeightonURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/leighton-moss/")
+MarshsideURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/marshside/")
+SaltholmeURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/saltholme/")
+DraytonURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/fen-drayton-lakes/")
+FramptonURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/frampton-marsh/")
+LakenheathURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/lakenheath-fen/")
+OuseURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/ouse-fen/")
+OuseWURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/ouse-washes/")
+SnettishamURL <- read_html("https://www.rspb.org.uk/reserves-and-events/reserves-a-z/snettisham/")
+
+#Pagham
+# RSPB doesn't store it's prices within a HTML table, so I've pulled the exact text using XPath
+Adult <- PaghamURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- PaghamURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+
+# Creating a dataframe from the HTML_text, trimming whitespace and removing characters
+Pagham <- data.frame (Type = c("Adult", "Child"),
+                      Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+
+# Changing the dataframe to a table
+Pagham <- setDT(Pagham)
+
+# Specifying a specific number of letters per string in RSPB (eg. when free or when a number has decimals). Change if the output is weird
+Pagham$Price <- substr(Pagham$Price,1,4)
+Pagham <- cbind(Pagham,Site="RSPB: Pagham","WWT Comparison Site"="Arundel")
+
+#Pulborough
+Adult <- PulboroughURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- PulboroughURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd/text()[1]') %>% 
+  html_text
+Pulborough <- data.frame (Type = c("Adult", "Child"),
+                          Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Pulborough <- setDT(Pulborough)
+Pulborough <- cbind(Pulborough,Site="RSPB: Pulborough","WWT Comparison Site"="Arundel")
+RSPB <- rbind(Pagham, Pulborough)
+
+#Mersehead
+Adult <- MerseheadURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- MerseheadURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Mersehead <- data.frame (Type = c("Adult", "Child"),
+                         Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Mersehead <- setDT(Mersehead)
+Mersehead$Price <- substr(Mersehead$Price,1,4)
+Mersehead <- cbind(Mersehead,Site="RSPB: Mersehead","WWT Comparison Site"="Caerlaverock")
+RSPB <- rbind(RSPB, Mersehead)
+
+#Burton_Mere
+Adult <- Burton_MereURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- Burton_MereURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Burton_Mere <- data.frame (Type = c("Adult", "Child"),
+                           Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Burton_Mere <- setDT(Burton_Mere)
+Burton_Mere$Price <- substr(Burton_Mere$Price,1,2)
+Burton_Mere <- cbind(Burton_Mere,Site="RSPB: Burton_Mere","WWT Comparison Site"="Martin Mere")
+RSPB <- rbind(RSPB, Burton_Mere)
+
+#Leighton
+Adult <- LeightonURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- LeightonURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Leighton <- data.frame (Type = c("Adult", "Child"),
+                        Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Leighton <- setDT(Leighton)
+Leighton$Price <- substr(Leighton$Price,1,5)
+Leighton <- cbind(Leighton,Site="RSPB: Leighton","WWT Comparison Site"="Martin Mere")
+RSPB <- rbind(RSPB, Leighton)
+
+#Marshside
+Adult <- MarshsideURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- MarshsideURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Marshside <- data.frame (Type = c("Adult", "Child"),
+                         Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Marshside <- setDT(Marshside)
+Marshside$Price <- substr(Marshside$Price,1,4)
+Marshside <- cbind(Marshside,Site="RSPB: Marshside","WWT Comparison Site"="Martin Mere")
+RSPB <- rbind(RSPB, Marshside)
+
+#Saltholme
+Adult <- SaltholmeURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- SaltholmeURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Saltholme<- data.frame (Type = c("Adult", "Child"),
+                        Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Saltholme <- setDT(Saltholme)
+Saltholme$Price <- substr(Saltholme$Price,1,2)
+Saltholme <- cbind(Saltholme,Site="RSPB: Saltholme","WWT Comparison Site"="Washington")
+RSPB <- rbind(RSPB, Saltholme)
+
+#Drayton
+Adult <- DraytonURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- DraytonURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Drayton <- data.frame (Type = c("Adult", "Child"),
+                       Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Drayton <- setDT(Drayton)
+Drayton$Price <- substr(Drayton$Price,1,4)
+Drayton <- cbind(Drayton,Site="RSPB: Fen Drayton", "WWT Comparison Site"="Welney")
+RSPB <- rbind(RSPB, Drayton)
+
+#Frampton
+Adult <- FramptonURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- FramptonURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Frampton <- data.frame (Type = c("Adult", "Child"),
+                        Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Frampton <- setDT(Frampton)
+Frampton$Price <- substr(Frampton$Price,1,5)
+Frampton <- cbind(Frampton,Site="RSPB: Frampton Marsh", "WWT Comparison Site"="Welney")
+RSPB <- rbind(RSPB, Frampton)
+
+#Lakenheath
+Adult <- LakenheathURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- LakenheathURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Lakenheath <- data.frame (Type = c("Adult", "Child"),
+                          Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Lakenheath <- setDT(Lakenheath)
+Lakenheath$Price <- substr(Lakenheath$Price,1,2)
+Lakenheath <- cbind(Lakenheath,Site="RSPB: Lakenheath Fen", "WWT Comparison Site"="Welney")
+RSPB <- rbind(RSPB, Lakenheath)
+
+#Ouse Fen
+Adult <- OuseURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- OuseURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Ouse <- data.frame (Type = c("Adult", "Child"),
+                    Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Ouse <- setDT(Ouse)
+Ouse$Price <- substr(Ouse$Price,1,4)
+Ouse <- cbind(Ouse,Site="RSPB: Ouse Fen", "WWT Comparison Site"="Welney")
+RSPB <- rbind(RSPB, Ouse)
+
+#Ouse Washes
+Adult <- OuseWURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- OuseWURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+OuseW <- data.frame (Type = c("Adult", "Child"),
+                     Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+OuseW <- setDT(OuseW)
+OuseW$Price <- substr(OuseW$Price,1,4)
+OuseW <- cbind(OuseW,Site="RSPB: Ouse Washes", "WWT Comparison Site"="Welney")
+RSPB <- rbind(RSPB, OuseW)
+
+#Snettisham
+Adult <- SnettishamURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[2]/dd') %>% 
+  html_text
+Child <- SnettishamURL %>% 
+  html_nodes(xpath='//*[@id="Key-information"]/div/div/div/div/div[2]/div/div[2]/div/dl[3]/dd') %>% 
+  html_text
+Snettisham <- data.frame (Type = c("Adult", "Child"),
+                          Price = c(trimws(gsub("\r\n","",Adult)),trimws(gsub("\r\n","",Child))))
+Snettisham <- setDT(Snettisham)
+Snettisham$Price <- substr(Snettisham$Price,1,4)
+Snettisham <- cbind(Snettisham,Site="RSPB: Snettisham", "WWT Comparison Site"="Welney")
+RSPB <- rbind(RSPB, Snettisham)
+
+# RSPB doesn't have Gift Aid as such I've created a column with N/A
+RSPB <- cbind(RSPB, With_Gift_Aid="N/A")
+
+# Reordering columns to match WWT and NT
+RSPB <- RSPB[,c(1,5,2,3,4)]
+
+# Renaming columns and values to match WWT and NT
+colnames(RSPB) <- Columns
+RSPB$Ticket <- gsub("Family","Family (2 Adults, 2 Children)",as.character(RSPB$Ticket))
+
+print(RSPB)
+
+write.xlsx(RSPB,"C:\\Users\\[[Name]]\\Downloads\\CompetitorAnalysis[ENTERDATE].xlsx")
